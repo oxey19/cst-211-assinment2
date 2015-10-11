@@ -10,16 +10,41 @@
 //Declaring Array2D class exsistes so Array2D.h dosn't need to be included
 template <class  Type> class Array2D;
 
+/************************************************************************
+* Class: Row
+*
+
+Description: This is a template class that keeps the data for the 2Darray
+
+* Constructors:
+*	Row(Array2D<Type>& theArray, int row)
+*		stores the 2Darray
+stores the row number for the 2Darray
+
+Row(const Array2D<Type> &theArray, int row);
+stores the 2Darray for a const object
+stores the row number for the 2Darray for a const object
+
+
+Mutators:
+template<class Type> Type& Row<Type>::operator[](int column):
+Allows the user to get at the data at the specified colum, from the row
+It data can be changed and sotred
+
+Inspectors:
+template<class Type> Type& Row<Type>::operator[](int column) const:
+Allows the user to get the data at the specified collumn from const objects
+
+
+*/
 
 template <class Type> class Row
 {
 public:
 
-	//Row &operator=(const Row &rhs);
-
 	Row(Array2D<Type>& theArray, int row);
 
-	Row(const Array2D<Type>& theArray, int row);
+	Row(const Array2D<Type> &theArray, int row);
 	
 	Type &operator[](int column);
 
@@ -27,62 +52,9 @@ public:
 
 
 private:
-
-	//Array2D<Type>& m_array2D;
 	int m_row;
-	Array2D<Type>& m_data;
-
-
-
-
-
+	//mutable Array2D<Type>& m_data;
+	mutable const Array2D<Type>& m_data;
 };
 
-
-
-
-template<class Type> Row<Type>::Row(Array2D<Type>& theArray, int row):
-m_row(row),
-m_data(theArray)
-{
-}
-
-
-template<class Type> Row<Type>::Row(const Array2D<Type>& theArray, int row):
-m_row(row)
-
-{
-	m_data& theArray;
-
-}
-
-template<class Type> Type& Row<Type>::operator[](int column)
-{
-	//m_data.select(row, column);
-	if (column < 0)
-	{
-		throw Exception("row specified is below 0");
-	}
-
-	if (column >= m_data.getColumn())
-	{
-		throw Exception("row specified is above maximum row");
-	}
-	return m_data.Select(m_row, column);
-}
-
-
-template<class Type> Type& Row<Type>::operator[](int column) const
-{
-	//m_data.select(row, column);
-	if (column < 0)
-	{
-		throw Exception("row specified is below 0");
-	}
-
-	if (column >= m_data.getColumn())
-	{
-		throw Exception("row specified is above maximum row");
-	}
-	return m_data.Select(m_row, column);
-}
+#include "Row.inc";
