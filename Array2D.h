@@ -86,66 +86,29 @@ public:
 
 	//operator overloading
 	Array2D &operator=(const Array2D &rhs);
-	Row<Type> &operator[](int index);
 
-	//Type &operator[](int index) const;
+	//overloaded subscript operator
+	Row<Type> operator[](int index);
 
-	//Getting and setting rows and collomns
+	//const subscript operator
+	Row<Type> operator[](int index) const;
+
+	//Getting rows and collomns
 	int getRow();
 	int getColumn();
 
+	//sets the row and column
 	void setRow(int rows);
 	void setColumn(int columns);
 
 	//selects a row and column
 	Type& Select(int row, int column);
 
-
-
-
-
-	//getting and setting start index
-	//int getStartIndex() const;
-	//void setStartIndex(int start_index);
-
-	
-	//getting and setting the length
-
-	//int getLength() const;
-	//void setLength(int length);
-
 private:
 	Type **m_array;
 	int m_row;
 	int m_col;
-
-	Row<Type> *m_rowArray;
-
-	//int m_length;
-	//int m_start_index;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //Array implimination
 /**************************************************************
@@ -159,11 +122,14 @@ private:
 
 template<class Type> Array2D<Type>::Array2D()
 {
-	//m_length = 0;
-	//m_start_index = 0;
 	m_col = 0;
 	m_row = 0;
-	m_array = new Type[m_length];
+
+	for (int i = 0; i < m_row; i++)
+	{
+		m_array[i] = new Type[m_col];
+	}
+
 }
 
 /**************************************************************
@@ -176,26 +142,15 @@ template<class Type> Array2D<Type>::Array2D()
 **************************************************************/
 template<class Type> Array2D<Type>::Array2D(int row, int col)
 {
-	//m_length = length;
-	//m_start_index = start_index;
 	m_row = row;
 	m_col = col;
-		//Array2D<Type> arrayofTypes(row);
 
+	m_array = new Type*[row];
 
-		Type* arrayofTypes = new Type[row];
-
-		//m_array = new Row<Type>(arrayofTypes, col)[row];
-
-	for (int i = 0; i < col; i++)
+	for (int i = 0; i < row; i++)
 	{
-		m_rowArray[i] = Row<Type>(arrayofTypes, i);
-
-			//Row<Type> theRow(arrayofTypes, i);
-			//*m_rowArray = theRow;
+		m_array[i] = new Type[col];
 	}
-
-
 }
 	
 
@@ -215,12 +170,26 @@ m_col(originalArray.m_col)
 {
 	//realocate the array
 
-	//****NEED TO CHANGE***
-	m_array = new Type[m_length];
+	//Type **tempArray;
+	m_array = new Type*[m_row];
+	//Type* arrayofTypes = new Type[row];
+	//m_array = new Row<Type>(arrayofTypes, col)[row];
 
-	for (int i = 0; i < m_length; i++)
+
+	//creates the 2 dimentional array
+	for (int i = 0; i < m_row; i++)
 	{
-		m_array[i] = originalArray[i];
+		m_array[i] = new Type[m_col];
+	}
+
+
+	//coppys the originalArray into this array
+	for (int rowIdx = 0; rowIdx < m_row; rowIdx++)
+	{
+		for (int Colidx = 0; Colidx < m_col; Colidx++)
+		{
+			m_array[rowIdx][Colidx] = originalArray.m_array[rowIdx][Colidx];
+		}
 	}
 }
 
@@ -238,7 +207,10 @@ template<class Type> Array2D<Type>::~Array2D()
 
 	
 	//***STEP THROUGH m_array AND DELETE ALL THE MEMORY IN ROW FIRST BEFORE DELEATING m_array***
-
+	for (int i = 0; i < m_row; i++)
+	{
+		delete[] m_array[i];
+	}
 
 	delete[] m_array;
 }
@@ -262,14 +234,40 @@ template<class Type> Array2D<Type> &Array2D<Type>::operator=(const Array2D &rhs)
 	m_row = rhs.m_row;
 	m_col = rhs.m_col;
 
-	m_array = new Type[m_length];
+
+	m_array = new Type*[m_row];
+	//Type* arrayofTypes = new Type[row];
+	//m_array = new Row<Type>(arrayofTypes, col)[row];
+
+
+	//creates the 2 dimentional array
+	for (int i = 0; i < rhs.m_row; i++)
+	{
+		m_array[i] = new Type[rhs.m_col];
+	}
+
+
+	//coppys the originalArray into this array
+	for (int rowIdx = 0; rowIdx < m_row; rowIdx++)
+	{
+		for (int Colidx = 0; Colidx < m_col; Colidx++)
+		{
+			m_array[rowIdx][Colidx] = rhs.m_array[rowIdx][Colidx];
+		}
+	}
+
+	
+	
+
+	/*m_array = new Type[m_length];
 
 	for (int i = 0; i < m_length; i++)
 	{
 		m_array[i] = rhs[i];
 	}
 	return *this;
-
+	*/
+	return *this;
 }
 
 
@@ -282,28 +280,152 @@ template<class Type> Array2D<Type> &Array2D<Type>::operator=(const Array2D &rhs)
 * Purpose: allows the user to use the [] to get accses and change elements at
 the specified index
 **************************************************************/
-template<class Type>   Row<Type> &Array2D<Type>::operator[](int index)
+template<class Type>   Row<Type> Array2D<Type>::operator[](int index)
 {
 	//check for index being <  the lower bound
 	//int m_length;
 	//int m_start_index;
-	if (index < m_start_index)
+	if (index < 0)
 	{
-		throw Exception("index below start index");
+		throw Exception("column below 0");
 	}
 
-	if (index > m_start_index + m_length - 1)
+	if (index > m_row)
 	{
-		throw Exception("index above max index");
+		throw Exception("column above max column");
 	}
 
-	return m_array[index - m_start_index];
+	Row<Type> row(*this, index);
+	return row;
+	//return row[index];
+}
+
+template<class Type> Type& Array2D<Type>::Select(int row, int column)
+{
+	//Checking for user trying to go out of bounds
+	if (row < 0)
+	{
+		throw Exception("row specified is below 0");
+	}
+
+	if (row > m_row)
+	{
+		throw Exception("row specified is above maximum row");
+	}
+
+	if (column < 0)
+	{
+		throw Exception("column specified is below 0");
+	}
+
+	if (column > m_col)
+	{
+		throw Exception("column specified is above maximum column");
+	}
+
+	return m_array[row][column];
+}
+
+template<class Type> int Array2D<Type>::getRow()
+{
+	return m_row;
+}
+
+template<class Type> int Array2D<Type>::getColumn()
+{
+	return m_col;
+}
+
+template<class Type> void Array2D<Type>::setColumn(int newCol)
+{
+	//Type **tempArray;
+	Array2D temp;
+	temp = *this;
+
+	//deletes m_array
+	for (int i = 0; i < m_row; i++)
+	{
+		delete[] m_array[i];
+	}
+
+	delete[] m_array;
+
+	//allocates the new memory for the array
+	m_row = temp.m_row;
+	m_col = newCol;
+
+	m_array = new Type*[m_row];
+
+	for (int i = 0; i < m_row; i++)
+	{
+		m_array[i] = new Type[newCol];
+	}
+
+	//transfers the temp to the new memory
+	for (int rowIdx = 0; rowIdx < m_row; rowIdx++)
+	{
+		for (int Colidx = 0; Colidx < m_col; Colidx++)
+		{
+			m_array[rowIdx][Colidx] = temp[rowIdx][Colidx];
+		}
+	}
+}
+
+template<class Type> void Array2D<Type>::setRow(int newRow)
+{
+	Array2D<Type> temp;
+	temp = *this;
+
+	//deletes m_array
+	for (int i = 0; i < m_row; i++)
+	{
+		delete[] m_array[i];
+	}
+
+	delete[] m_array;
+
+	//allocates the new memory for the array
+	m_row = newRow;
+	m_col = temp.m_col;
+
+	m_array = new Type*[newRow];
+
+	for (int i = 0; i < newRow; i++)
+	{
+		m_array[i] = new Type[m_col];
+	}
+
+	//transfers the temp to the new memory
+	for (int rowIdx = 0; rowIdx < m_row; rowIdx++)
+	{
+		for (int Colidx = 0; Colidx < m_col; Colidx++)
+		{
+			m_array[rowIdx][Colidx] = temp[rowIdx][Colidx];
+		}
+	}
 }
 
 
 
+template<class Type>   Row<Type> Array2D<Type>::operator[](int index) const
+{
+	//check for index being <  the lower bound
+	//int m_length;
+	//int m_start_index;
+	if (index < 0)
+	{
+		throw Exception("column below 0");
+	}
 
+	if (index > m_row)
+	{
+		throw Exception("column above max column");
+	}
 
+	Row<Type> row(*this, index);
+	return row;
+	//return row[index];
+}
 
 
 
